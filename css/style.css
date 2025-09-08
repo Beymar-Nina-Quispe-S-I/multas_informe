@@ -1,0 +1,56 @@
+.titulo {
+  font-weight: 700;
+}
+
+/* Estilos para el nuevo diseño */
+.contenedor-principal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px;
+}
+
+/* En pantallas grandes, mostrar en formato de dos columnas */
+@media (min-width: 992px) {
+  .contenedor-principal {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .seccion-tabla {
+    width: 60%;
+  }
+
+  .seccion-lateral {
+    width: 35%;
+  }
+}
+
+/* En pantallas pequeñas, centrar todo */
+@media (max-width: 991px) {
+  .seccion-tabla,
+  .seccion-lateral {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
+.card-deudores {
+  margin-bottom: 20px;
+}
+
+.fondo-seccion {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 20px;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.estudiante-deudor {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background-color: #fff;
+  border-left: 4px solid #dc3545;
+}
