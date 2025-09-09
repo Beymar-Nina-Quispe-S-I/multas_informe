@@ -1,0 +1,239 @@
+// Configuración para la API de Yape
+let yapeConfig = {
+  numeroYape: "+59170123456", // Número de teléfono boliviano para Yape
+  nombreBeneficiario: "Sistema de Multas ITF"
+};
+
+// Cargar configuración de Yape desde Supabase
+async function cargarConfiguracionYape() {
+  try {
+    const config = await obtenerConfiguracionYape();
+    if (config) {
+      yapeConfig = config;
+      console.log("Configuración de Yape cargada correctamente");
+    }
+  } catch (error) {
+    console.error("Error al cargar configuración de Yape:", error);
+  }
+}
+
+// Función para generar QR de Yape usando la API de QR Server
+function generarQRYape(monto, concepto, estudiante) {
+  // Crear datos para el QR
+  const datosQR = {
+    numero: yapeConfig.numeroYape,
+    monto: monto,
+    concepto: concepto,
+    estudiante: estudiante,
+    timestamp: new Date().getTime()
+  };
+  
+  // Convertir a string para el QR
+  const datosQRString = JSON.stringify(datosQR);
+  
+  // Generar QR usando la API de QR Server
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(datosQRString)}&color=28a745&bgcolor=ffffff`;
+}
+
+// Función para mostrar modal de pago con Yape
+function mostrarModalPagoYape(estudiante) {
+  // Crear modal para pago con Yape
+  const modalHTML = `
+  <div class="modal fade" id="modalPagoYape" tabindex="-1" aria-labelledby="modalPagoYapeLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+              <div class="modal-header bg-success text-white">
+                  <h5 class="modal-title" id="modalPagoYapeLabel">Pagar con Yape</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body text-center">
+                  <h4>Deuda: ${estudiante.deuda} Bs.</h4>
+                  <p>Escanea el código QR con tu app de Yape para pagar</p>
+                  <div class="qr-container my-3">
+                      <img src="${generarQRYape(estudiante.deuda, 'Pago de multa', estudiante.nombre)}" alt="QR Yape" class="img-fluid border p-2" style="max-width: 200px;">
+                  </div>
+                  <div class="yape-info">
+                      <p class="mb-1"><strong>Beneficiario:</strong> ${yapeConfig.nombreBeneficiario}</p>
+                      <p class="mb-1"><strong>Número:</strong> ${yapeConfig.numeroYape}</p>
+                      <p class="mb-3"><strong>Monto:</strong> ${estudiante.deuda} Bs.</p>
+                  </div>
+                  <div class="alert alert-info">
+                      <i class="bi bi-info-circle"></i> Una vez realizado el pago, la deuda se actualizará en el sistema.
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-success" id="btnConfirmarPago">Confirmar Pago</button>
+              </div>
+          </div>
+      </div>
+  </div>
+  `;
+  
+  // Eliminar modal anterior si existe
+  const modalAnterior = document.getElementById('modalPagoYape');
+  if (modalAnterior) {
+    modalAnterior.remove();
+  }
+  
+  // Añadir modal al DOM
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // Mostrar modal
+  const modal = new bootstrap.Modal(document.getElementById('modalPagoYape'));
+  modal.show();
+  
+  // Configurar botón de confirmar pago
+  document.getElementById('btnConfirmarPago').addEventListener('click', function() {
+    confirmarPagoYape(estudiante);
+  });
+}
+
+// Función para confirmar pago con Yape
+async function confirmarPagoYape(estudiante) {
+  try {
+    // Mostrar spinner de carga
+    const btnConfirmar = document.getElementById('btnConfirmarPago');
+    const btnTextoOriginal = btnConfirmar.innerHTML;
+    btnConfirmar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...';
+    btnConfirmar.disabled = true;
+    
+    // Registrar pago en Supabase
+    const resultado = await registrarPago(
+      estudiante.id,
+      estudiante.deuda,
+      'Yape',
+      `Pago Yape - ${new Date().toISOString()}`
+    );
+    
+    // Cerrar modal
+    bootstrap.Modal.getInstance(document.getElementById('modalPagoYape')).hide();
+    
+    if (resultado) {
+      // Mostrar mensaje de éxito
+      Swal.fire({
+        title: '¡Pago Exitoso!',
+        text: 'El pago ha sido registrado correctamente.',
+        icon: 'success',
+        confirmButtonColor: '#28a745'
+      });
+      
+      // Actualizar datos del estudiante
+      if (typeof actualizarTablaEstudiantes === 'function') {
+        actualizarTablaEstudiantes();
+      }
+      
+      if (typeof mostrarEstudiantesConDeudas === 'function') {
+        mostrarEstudiantesConDeudas();
+      }
+      
+      if (typeof cargarDatosDashboard === 'function') {
+        cargarDatosDashboard();
+      }
+    } else {
+      // Mostrar mensaje de error
+      Swal.fire({
+        title: 'Error',
+        text: 'No se pudo procesar el pago. Intente nuevamente.',
+        icon: 'error',
+        confirmButtonColor: '#dc3545'
+      });
+    }
+  } catch (error) {
+    console.error('Error al confirmar pago:', error);
+    
+    // Mostrar mensaje de error
+    Swal.fire({
+      title: 'Error',
+      text: 'Ocurrió un error al procesar el pago. Intente nuevamente.',
+      icon: 'error',
+      confirmButtonColor: '#dc3545'
+    });
+  }
+}
+
+// Función para configurar botones de pago con Yape en la tabla
+function configurarBotonesPagoYape() {
+  // Cargar configuración de Yape
+  cargarConfiguracionYape();
+  
+  // Añadir evento a los botones de pago
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('btn-pago-yape')) {
+      const estudianteId = e.target.getAttribute('data-estudiante-id');
+      const estudiante = estudiantes.find(est => est.id == estudianteId);
+      
+      if (estudiante && estudiante.deuda > 0) {
+        mostrarModalPagoYape(estudiante);
+      }
+    }
+  });
+}
+
+// Función para editar configuración de Yape (para administradores)
+async function editarConfiguracionYape() {
+  // Cargar configuración actual
+  const config = await obtenerConfiguracionYape();
+  
+  // Mostrar modal para editar
+  Swal.fire({
+    title: 'Configuración de Yape',
+    html: `
+      <div class="form-group mb-3">
+        <label for="numeroYape" class="form-label">Número de Yape</label>
+        <input type="text" id="numeroYape" class="form-control" value="${config.numero}">
+      </div>
+      <div class="form-group mb-3">
+        <label for="nombreBeneficiario" class="form-label">Nombre del Beneficiario</label>
+        <input type="text" id="nombreBeneficiario" class="form-control" value="${config.nombreBeneficiario}">
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Guardar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#28a745',
+    cancelButtonColor: '#6c757d',
+    preConfirm: () => {
+      const numero = document.getElementById('numeroYape').value;
+      const nombre = document.getElementById('nombreBeneficiario').value;
+      
+      if (!numero || !nombre) {
+        Swal.showValidationMessage('Todos los campos son obligatorios');
+        return false;
+      }
+      
+      return { numero, nombreBeneficiario: nombre };
+    }
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        // Actualizar configuración en Supabase
+        const actualizado = await actualizarConfiguracionYape(result.value);
+        
+        if (actualizado) {
+          // Actualizar configuración local
+          yapeConfig = result.value;
+          
+          Swal.fire(
+            '¡Guardado!',
+            'La configuración de Yape ha sido actualizada.',
+            'success'
+          );
+        } else {
+          Swal.fire(
+            'Error',
+            'No se pudo actualizar la configuración.',
+            'error'
+          );
+        }
+      } catch (error) {
+        console.error('Error al actualizar configuración:', error);
+        Swal.fire(
+          'Error',
+          'Ocurrió un error al guardar la configuración.',
+          'error'
+        );
+      }
+    }
+  });
+}

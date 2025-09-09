@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -38,15 +38,21 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#"
+                <a
+                  class="nav-link active"
+                  aria-current="page"
+                  href="#seccionEstudiantes"
                   >Estudiantes</a
                 >
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Catedraticos</a>
+                <a class="nav-link" href="#seccionDeudores">Deudores</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#seccionFondo">Fondos</a>
               </li>
             </ul>
-            <form class="d-flex">
+            <form class="d-flex me-2">
               <input
                 class="form-control me-2"
                 type="search"
@@ -57,14 +63,31 @@
                 <i class="bi bi-search"></i>
               </button>
             </form>
+            <div class="d-flex align-items-center">
+              <a
+                href="login.html"
+                id="btnLogin"
+                class="btn btn-outline-light me-2"
+                ><i class="bi bi-box-arrow-in-right"></i> Login</a
+              >
+              <a
+                href="admin.html"
+                id="btnAdmin"
+                class="btn btn-outline-danger d-none"
+                ><i class="bi bi-shield-lock"></i> Admin</a
+              >
+              <button id="btnLogout" class="btn btn-outline-light d-none">
+                <i class="bi bi-box-arrow-right"></i> Salir
+              </button>
+            </div>
           </div>
         </div>
       </nav>
     </header>
 
     <div class="container contenedor-principal">
-      <!-- Sección de la tabla (izquierda en pantallas grandes, centrada en pequeñas) -->
-      <div class="seccion-tabla">
+      <!-- Sección de Estudiantes con la tabla -->
+      <div class="seccion-tabla" id="seccionEstudiantes">
         <div class="card shadow-sm">
           <div class="card-header text-center bg-dark text-white">
             <h2>Listado de Estudiantes</h2>
@@ -91,8 +114,8 @@
         </div>
       </div>
 
-      <!-- Sección lateral (derecha en pantallas grandes, debajo en pequeñas) -->
-      <div class="seccion-lateral">
+      <!-- Sección de Deudores -->
+      <div class="seccion-lateral" id="seccionDeudores">
         <!-- Tarjeta de estudiantes con deudas -->
         <div class="card shadow-sm card-deudores">
           <div class="card-header text-center bg-danger text-white">
@@ -105,19 +128,16 @@
           </div>
         </div>
 
-        <!-- Sección de fondo para datos adicionales -->
-        <div class="fondo-seccion bg-success text-white">
-          <h4 class="text-center mb-3 text-light">Información Adicional</h4>
+        <!-- Sección de Fondos -->
+        <div class="fondo-seccion bg-success text-white" id="seccionFondo">
+          <h4 class="text-center mb-3">Información de Fondos</h4>
           <div id="datos-adicionales">
-            <p class="text-light text-center">Fondo 123 Bs</p>
-            <ul>
-              <li>Primera lista → 44 Bs</li>
-              <li>Segunda lista → 24 Bs</li>
-              <li>Tercera lista → 13 Bs</li>
-              <li>Cuarta lista → 24 Bs</li>
-              <li>Quinta lista → 18 Bs</li>
-              <li>Total acumulado = 123 Bs</li>
-            </ul>
+            <!-- Aquí se pueden agregar datos adicionales que no irán al PDF -->
+            <p class="text-center">Información sobre los fondos recaudados</p>
+            <div class="text-center mt-3">
+              <h5>Total Recaudado</h5>
+              <p class="display-6" id="totalRecaudado">83 Bs.</p>
+            </div>
           </div>
         </div>
       </div>

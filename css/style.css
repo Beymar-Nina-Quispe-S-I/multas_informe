@@ -1,5 +1,6 @@
 .titulo {
   font-weight: 700;
+  letter-spacing: 1px;
 }
 
 /* Estilos para el nuevo diseño */
@@ -37,6 +38,9 @@
 
 .card-deudores {
   margin-bottom: 20px;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 .fondo-seccion {
@@ -45,6 +49,30 @@
   padding: 15px;
   margin-top: 20px;
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.navbar {
+  background: linear-gradient(90deg, #1a237e, #283593) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background: linear-gradient(90deg, #1a237e, #283593);
+  color: white;
+}
+
+.btn-primary {
+  background-color: #1a237e;
+  border-color: #1a237e;
+}
+
+.btn-primary:hover {
+  background-color: #0d1b69;
+  border-color: #0d1b69;
+}
+
+.table-dark {
+  background-color: #1a237e;
 }
 
 .estudiante-deudor {

@@ -25,13 +25,42 @@ const estudiantes = [
 ];
 
 // Función para inicializar la aplicación
+// Añadir esta función para manejar la navegación del navbar
+function configurarNavegacion() {
+  // Obtener todos los enlaces del navbar
+  const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+  
+  // Añadir evento click a cada enlace
+  navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      // Prevenir comportamiento predeterminado
+      e.preventDefault();
+      
+      // Remover clase active de todos los enlaces
+      navLinks.forEach(l => l.classList.remove('active'));
+      
+      // Añadir clase active al enlace clickeado
+      this.classList.add('active');
+      
+      // Obtener el id de la sección a mostrar
+      const targetId = this.getAttribute('href');
+      
+      // Hacer scroll suave a la sección
+      document.querySelector(targetId).scrollIntoView({
+        behavior: 'smooth'
+      });
+    });
+  });
+}
+
+// Añadir esta función a la inicialización
 document.addEventListener("DOMContentLoaded", function () {
-  // Cargar scripts necesarios para PDF
-  cargarScriptsPDF();
+  // Cargar scripts necesarios
+  cargarScripts();
 
   // Inicializar la tabla con datos
   actualizarTablaEstudiantes();
-
+  
   // Mostrar estudiantes con deudas en la sección lateral
   mostrarEstudiantesConDeudas();
 
@@ -43,21 +72,49 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Configurar botón para generar PDF
   agregarBotonPDF();
+  
+  // Configurar interfaz según sesión
+  configurarInterfazSegunSesion();
+  
+  // Configurar botón de logout
+  const btnLogout = document.getElementById("btnLogout");
+  if (btnLogout) {
+    btnLogout.addEventListener("click", cerrarSesion);
+  }
+  
+  // Configurar botones de pago con Yape
+  configurarBotonesPagoYape();
+  
+  // Configurar navegación del navbar
+  configurarNavegacion();
 });
 
-// Función para cargar scripts necesarios para PDF
-function cargarScriptsPDF() {
+// Función para cargar scripts necesarios
+function cargarScripts() {
   // Cargar jsPDF
   const jspdfScript = document.createElement("script");
-  jspdfScript.src =
-    "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+  jspdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
   document.body.appendChild(jspdfScript);
 
   // Cargar html2canvas
   const html2canvasScript = document.createElement("script");
-  html2canvasScript.src =
-    "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+  html2canvasScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
   document.body.appendChild(html2canvasScript);
+  
+  // Cargar script de Yape
+  const yapeScript = document.createElement("script");
+  yapeScript.src = "js/yape.js";
+  document.body.appendChild(yapeScript);
+  
+  // Cargar script de Supabase
+  const supabaseScript = document.createElement("script");
+  supabaseScript.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  document.body.appendChild(supabaseScript);
+  
+  // Cargar configuración de Supabase
+  const supabaseConfigScript = document.createElement("script");
+  supabaseConfigScript.src = "js/supabase-config.js";
+  document.body.appendChild(supabaseConfigScript);
 }
 
 // Función para actualizar la tabla de estudiantes
@@ -176,287 +233,103 @@ function configurarBuscador() {
 
 // Función para mostrar detalles del estudiante en un modal
 function mostrarDetallesEstudiante(estudiante) {
-  // Eliminar modal anterior si existe
-  const modalAnterior = document.getElementById("detalleEstudianteModal");
-  if (modalAnterior) {
-    modalAnterior.remove();
-  }
-
-  // Crear modal
-  const modal = document.createElement("div");
-  modal.id = "detalleEstudianteModal";
-  modal.className = "modal fade";
-  modal.setAttribute("tabindex", "-1");
-  modal.setAttribute("aria-labelledby", "detalleEstudianteModalLabel");
-  modal.setAttribute("aria-hidden", "true");
-
-  // Contenido del modal
-  modal.innerHTML = `
+  // Solo mostrar modal si tiene deuda
+  if (estudiante.deuda > 0) {
+    // Crear el modal
+    const modalHTML = `
+      <div class="modal fade" id="detalleEstudianteModal" tabindex="-1" aria-labelledby="detalleEstudianteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header ${
-                  estudiante.deuda > 0
-                    ? "bg-danger text-white"
-                    : "bg-success text-white"
-                }">
-                    <h5 class="modal-title" id="detalleEstudianteModalLabel">Detalles del Estudiante</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">${estudiante.nombre} ${
-    estudiante.apellido
-  }</h5>
-                            <p class="card-text"><strong>ID:</strong> ${
-                              estudiante.id
-                            }</p>
-                            <p class="card-text"><strong>Estado:</strong> 
-                                ${
-                                  estudiante.deuda > 0
-                                    ? `<span class="text-danger fw-bold">Debe ${estudiante.deuda} Bs.</span>`
-                                    : '<span class="text-success fw-bold">No debe nada</span>'
-                                }
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    ${
-                      estudiante.deuda > 0
-                        ? `
-                    <a href="https://wa.me/59160637274?text=Hola,%20soy%20${encodeURIComponent(
-                      estudiante.nombre + " " + estudiante.apellido
-                    )}%20(ID:%20${
-                            estudiante.id
-                          }).%20Quiero%20reclamar%20sobre%20mi%20deuda%20de%20${
-                            estudiante.deuda
-                          }%20Bs." class="btn btn-reclamar" target="_blank">
-                        <i class="bi bi-whatsapp"></i> Reclamar
-                    </a>
-                    `
-                        : ""
-                    }
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
+          <div class="modal-content">
+            <div class="modal-header ${estudiante.deuda > 10 ? 'bg-danger' : 'bg-warning'} text-white">
+              <h5 class="modal-title" id="detalleEstudianteModalLabel">Detalles de Deuda</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <div class="modal-body">
+              <div class="text-center mb-3">
+                <i class="bi ${estudiante.deuda > 10 ? 'bi-exclamation-triangle' : 'bi-exclamation-circle'} fs-1 ${estudiante.deuda > 10 ? 'text-danger' : 'text-warning'}"></i>
+              </div>
+              <h4 class="text-center mb-4">${estudiante.apellido}, ${estudiante.nombre}</h4>
+              <div class="row mb-3">
+                <div class="col-6 text-end fw-bold">ID:</div>
+                <div class="col-6">${estudiante.id}</div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-6 text-end fw-bold">Deuda:</div>
+                <div class="col-6 fw-bold ${estudiante.deuda > 10 ? 'text-danger' : 'text-warning'}">${estudiante.deuda} Bs.</div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-6 text-end fw-bold">Estado:</div>
+                <div class="col-6">
+                  <span class="badge ${estudiante.deuda > 10 ? 'bg-danger' : 'bg-warning'}">Pendiente</span>
+                </div>
+              </div>
+              <div class="alert alert-secondary mt-3">
+                <p class="mb-0 small">Para regularizar su situación, debe realizar el pago correspondiente.</p>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn btn-success btn-pagar-yape" data-id="${estudiante.id}">Pagar con Yape</button>
+              <button type="button" class="btn btn-primary btn-reclamar" data-id="${estudiante.id}">Reclamar</button>
+            </div>
+          </div>
         </div>
+      </div>
     `;
 
-  document.body.appendChild(modal);
-
-  // Mostrar el modal
-  const modalInstance = new bootstrap.Modal(modal);
-  modalInstance.show();
-}
-
-// Función para configurar acceso a catedráticos
-function configurarAccesoCatedraticos() {
-  const enlaceCatedraticos = document.querySelector(".nav-link:not(.active)");
-
-  enlaceCatedraticos.addEventListener("click", function (e) {
-    e.preventDefault();
-
-    // Crear modal de acceso restringido
-    const modal = document.createElement("div");
-    modal.className = "modal fade";
-    modal.id = "accesoCatedraticosModal";
-    modal.setAttribute("tabindex", "-1");
-    modal.setAttribute("aria-labelledby", "accesoCatedraticosModalLabel");
-    modal.setAttribute("aria-hidden", "true");
-
-    modal.innerHTML = `
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-warning">
-                        <h5 class="modal-title" id="accesoCatedraticosModalLabel">Acceso Restringido</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="text-center mb-3">
-                            <i class="bi bi-shield-lock" style="font-size: 3rem; color: #ffc107;"></i>
-                        </div>
-                        <p class="text-center fw-bold">Necesitas permiso de administrador para acceder a esta sección.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-    document.body.appendChild(modal);
+    // Añadir el modal al DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
 
     // Mostrar el modal
-    const modalInstance = new bootstrap.Modal(modal);
-    modalInstance.show();
-
-    // Eliminar el modal del DOM después de cerrarlo
-    modal.addEventListener("hidden.bs.modal", function () {
-      modal.remove();
+    const modal = new bootstrap.Modal(document.getElementById('detalleEstudianteModal'));
+    modal.show();
+    
+    // Configurar botón de pago con Yape
+    document.querySelector('.btn-pagar-yape').addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      const est = estudiantes.find(e => e.id == id);
+      if (est) {
+        modal.hide();
+        mostrarModalPagoYape(est);
+      }
     });
-  });
-}
+    
+    // Configurar botón de reclamar
+    document.querySelector('.btn-reclamar').addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      const est = estudiantes.find(e => e.id == id);
+      if (est) {
+        enviarReclamo(est);
+      }
+    });
 
-// Función para agregar botón de generar PDF
-function agregarBotonPDF() {
-  // Crear botón para generar PDF
-  const botonPDF = document.createElement("button");
-  botonPDF.className = "btn btn-primary ms-2";
-  botonPDF.innerHTML = '<i class="bi bi-file-pdf"></i> Generar PDF';
-
-  // Añadir el botón al encabezado de la tarjeta
-  const cardHeader = document.querySelector(".card-header");
-  cardHeader.style.display = "flex";
-  cardHeader.style.justifyContent = "space-between";
-  cardHeader.style.alignItems = "center";
-
-  // Crear contenedor para el título
-  const tituloContainer = document.createElement("div");
-  tituloContainer.innerHTML = cardHeader.innerHTML;
-  cardHeader.innerHTML = "";
-
-  cardHeader.appendChild(tituloContainer);
-  cardHeader.appendChild(botonPDF);
-
-  // Añadir evento para generar PDF
-  botonPDF.addEventListener("click", generarPDF);
-}
-
-// Función para generar PDF
-function generarPDF() {
-  // Verificar si las bibliotecas están cargadas
-  if (typeof html2canvas === "undefined" || typeof jspdf === "undefined") {
-    alert(
-      "Cargando las bibliotecas necesarias. Por favor, intente nuevamente en unos segundos."
-    );
-    return;
+    // Eliminar el modal del DOM cuando se cierre
+    document.getElementById('detalleEstudianteModal').addEventListener('hidden.bs.modal', function () {
+      this.remove();
+    });
   }
+}
 
-  // Mostrar mensaje de generación
-  const loadingMessage = document.createElement("div");
-  loadingMessage.style.position = "fixed";
-  loadingMessage.style.top = "0";
-  loadingMessage.style.left = "0";
-  loadingMessage.style.width = "100%";
-  loadingMessage.style.height = "100%";
-  loadingMessage.style.backgroundColor = "rgba(0,0,0,0.5)";
-  loadingMessage.style.display = "flex";
-  loadingMessage.style.justifyContent = "center";
-  loadingMessage.style.alignItems = "center";
-  loadingMessage.style.zIndex = "9999";
-  loadingMessage.innerHTML = `
-    <div class="card p-4 shadow-lg" style="max-width: 400px;">
-      <div class="text-center">
-        <div class="spinner-border text-primary mb-3" role="status">
-          <span class="visually-hidden">Cargando...</span>
-        </div>
-        <h5>Generando PDF...</h5>
-        <p class="text-muted">Por favor espere un momento</p>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(loadingMessage);
-
-  // Obtener la tabla
-  const tabla = document.querySelector(".table");
-
-  // Crear un contenedor para el PDF
-  const pdfContainer = document.createElement("div");
-  pdfContainer.style.position = "absolute";
-  pdfContainer.style.left = "-9999px";
-  pdfContainer.style.width = "800px";
-
-  // Crear el contenido del PDF
-  const fecha = new Date().toLocaleDateString("es-BO");
-  pdfContainer.innerHTML = `
-    <div style="padding: 50px; font-family: Arial, sans-serif;">
-      <div style="text-align: center; margin-bottom: 5px;">
-        <h1 style="color:rgb(0, 0, 0); margin-bottom: 5px;">MULTAS DE I.T.F.</h1>
-        <p style="color:rgb(132, 135, 139); font-size: 14px;">Fecha: ${fecha}</p>
-      </div>
-      
-      <h2 style=" text-align: center; color:rgb(245, 0, 0);font-size: 16px; margin-bottom: 5px;font-weight: bold;">LISTADO DE ESTUDIANTES CON SU DEUDA</h2>
-      
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
-        <thead>
-          <tr style="background-color:rgb(71, 71, 71); color: white;">
-            <th style="padding: 12px; text-align: center; border: 1px solid rgb(172, 172, 172);">ID</th>
-            <th style="padding: 12px; text-align: center; border: 1px solid rgb(172, 172, 172);">Apellido</th>
-            <th style="padding: 12px; text-align: center; border: 1px solid rgb(172, 172, 172);">Nombre</th>
-            <th style="padding: 12px; text-align: center; border: 1px solid rgb(172, 172, 172);">Deuda (Bs.)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${estudiantes
-            .map(
-              (est) => `
-            <tr style="${
-              est.deuda > 0 ? "background-color:rgb(254, 172, 179);" : ""
-            }">
-              <td style="padding: 5px; text-align: center; border: 1px solid rgb(172, 172, 172);">${
-                est.id
-              }</td>
-              <td style="padding: 5px; text-align: left; border: 1px solid rgb(172, 172, 172);">${
-                est.apellido
-              }</td>
-              <td style="padding: 5px; text-align: left; border: 1px solid rgb(172, 172, 172);">${
-                est.nombre
-              }</td>
-              <td style="padding: 5px; text-align: center; border: 1px solid rgb(172, 172, 172); ${
-                est.deuda > 0 ? "color:rgb(0, 0, 0); font-weight: bold;" : ""
-              }">${est.deuda}</td>
-            </tr>
-          `
-            )
-            .join("")}
-        </tbody>
-      </table>
-      
-      <div style="margin-top: 2px; font-size: 10px; color: #6c757d; text-align: center;">
-        <p>Este documento es un reporte oficial de multas de I.T.F.</p>
-        <p>Para cualquier reclamo, contactar al ...</p>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(pdfContainer);
-
-  // Usar html2canvas para convertir el contenido a imagen
-  html2canvas(pdfContainer).then((canvas) => {
-    // Crear PDF
-    const pdf = new jspdf.jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
+// Función para configurar botones de pago con Yape
+function configurarBotonesPagoYape() {
+  document.querySelectorAll('.btn-pagar-yape').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      const estudiante = estudiantes.find(est => est.id == id);
+      if (estudiante) {
+        mostrarModalPagoYape(estudiante);
+      }
     });
-
-    // Añadir la imagen al PDF
-    const imgData = canvas.toDataURL("image/png");
-    const imgWidth = 210; // A4 width in mm
-    const pageHeight = 295; // A4 height in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    // Añadir páginas adicionales si es necesario
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
-    // Guardar el PDF
-    pdf.save(`Multas_ITF_${fecha.replace(/\//g, "-")}.pdf`);
-
-    // Eliminar elementos temporales
-    document.body.removeChild(pdfContainer);
-    document.body.removeChild(loadingMessage);
   });
+}
+
+// Función para enviar reclamo por WhatsApp
+function enviarReclamo(estudiante) {
+  const mensaje = `Reclamo sobre multa: Estudiante ${estudiante.nombre} ${estudiante.apellido}, ID: ${estudiante.id}, Monto: ${estudiante.deuda} Bs.`;
+  const numeroWhatsApp = "+59170123456"; // Número de WhatsApp boliviano
+  const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+  
+  window.open(urlWhatsApp, '_blank');
 }
 
 // Función para mostrar estudiantes con deudas en la sección lateral
@@ -501,4 +374,44 @@ function mostrarEstudiantesConDeudas() {
 
     listaDeudores.appendChild(deudorElement);
   });
+}
+
+// Función para configurar la interfaz según la sesión
+function configurarInterfazSegunSesion() {
+  const userSession = localStorage.getItem("userSession");
+  const adminSession = localStorage.getItem("adminSession");
+  
+  const btnLogin = document.getElementById("btnLogin");
+  const btnLogout = document.getElementById("btnLogout");
+  const btnAdmin = document.getElementById("btnAdmin");
+  const userInfo = document.getElementById("userInfo");
+  
+  if (userSession) {
+    // Hay una sesión de usuario normal
+    const userData = JSON.parse(userSession);
+    
+    if (btnLogin) btnLogin.classList.add("d-none");
+    if (btnLogout) btnLogout.classList.remove("d-none");
+    if (btnAdmin) btnAdmin.classList.add("d-none");
+    if (userInfo) userInfo.innerHTML = `<i class="bi bi-person-circle"></i> ${userData.nombre}`;
+  } else if (adminSession) {
+    // Hay una sesión de administrador
+    const adminData = JSON.parse(adminSession);
+    
+    if (btnLogin) btnLogin.classList.add("d-none");
+    if (btnLogout) btnLogout.classList.remove("d-none");
+    if (btnAdmin) btnAdmin.classList.remove("d-none");
+    if (userInfo) userInfo.innerHTML = `<i class="bi bi-shield-lock"></i> ${adminData.nombre}`;
+  } else {
+    // No hay sesión activa, redirigir a login
+    window.location.href = "login.html";
+  }
+}
+
+// Función para cerrar sesión
+function cerrarSesion() {
+  localStorage.removeItem("userSession");
+  localStorage.removeItem("adminSession");
+  localStorage.removeItem("guestSession"); // Por si acaso queda alguna sesión antigua
+  window.location.href = "login.html";
 }
