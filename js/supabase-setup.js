@@ -2,9 +2,8 @@
 // CONFIGURACIÓN SUPABASE
 // =====================
 const SUPABASE_URL = 'https://cgvhokfwcxxmapdceyxg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNndmhva2Z3Y3h4bWFwZGNleXhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1Mzg4NzcsImV4cCI6MjA3MzExNDg3N30.52FU6yrub6mJoMM13Sw_ND6ClmTTsGXoH8s3q9oBqd4'; // recortado por seguridad
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNndmhva2Z3Y3h4bWFwZGNleXhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1Mzg4NzcsImV4cCI6MjA3MzExNDg3N30.52FU6yrub6mJoMM13Sw_ND6ClmTTsGXoH8s3q9oBqd4';
 
-// Cliente global
 let supabase = null;
 
 // =====================
@@ -17,7 +16,6 @@ function initializeSupabase() {
 
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     window.supabaseClient = supabase;
-
     console.log("✅ SUPABASE INICIALIZADO");
     return supabase;
 }
@@ -45,7 +43,7 @@ function loadSupabase() {
 }
 
 // =====================
-// FUNCIÓN DE TEST DE CONEXIÓN
+// TEST DE CONEXIÓN
 // =====================
 async function testSupabaseConnection() {
     try {
@@ -54,11 +52,7 @@ async function testSupabaseConnection() {
             return false;
         }
 
-        const { data, error } = await supabase
-            .from('estudiantes')
-            .select('id')
-            .limit(1);
-
+        const { data, error } = await supabase.from('estudiantes').select('id').limit(1);
         if (error) throw error;
 
         console.log("✅ Conexión Supabase OK:", data);
@@ -70,7 +64,7 @@ async function testSupabaseConnection() {
 }
 
 // =====================
-// FUNCIONES ESTUDIANTES
+// CLASE ESTUDIANTESDB
 // =====================
 class EstudiantesDB {
     static async obtenerTodos() {
@@ -142,7 +136,7 @@ class EstudiantesDB {
 }
 
 // =====================
-// FUNCIONES CONFIGURACIÓN
+// CLASE CONFIGURACIONDB
 // =====================
 class ConfiguracionDB {
     static async obtenerYape() {
@@ -153,7 +147,12 @@ class ConfiguracionDB {
                 .eq('tipo', 'yape')
                 .single();
             if (error && error.code !== 'PGRST116') throw error;
-            return data?.config || { nombreBeneficiario: "Sistema Multas ITF", numeroYape: "70123456", montoMinimo: 1, montoMaximo: 1000 };
+            return data?.config || {
+                nombreBeneficiario: "Sistema Multas ITF",
+                numeroYape: "70123456",
+                montoMinimo: 1,
+                montoMaximo: 1000
+            };
         } catch (error) {
             console.error("Error al obtener config Yape:", error);
             return { nombreBeneficiario: "Sistema Multas ITF", numeroYape: "70123456", montoMinimo: 1, montoMaximo: 1000 };

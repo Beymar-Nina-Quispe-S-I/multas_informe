@@ -1,14 +1,18 @@
+/* =====================
+   ESTILOS GENERALES
+===================== */
 .titulo {
   font-weight: 700;
   letter-spacing: 1px;
 }
 
-/* Estilos para el nuevo diseño */
+/* Contenedor principal */
 .contenedor-principal {
   display: flex;
   flex-direction: column;
   width: 100%;
   padding: 20px;
+  gap: 20px;
 }
 
 /* En pantallas grandes, mostrar en formato de dos columnas */
@@ -16,6 +20,7 @@
   .contenedor-principal {
     flex-direction: row;
     justify-content: space-between;
+    gap: 20px;
   }
 
   .seccion-tabla {
@@ -29,6 +34,7 @@
 
 /* En pantallas pequeñas, centrar todo */
 @media (max-width: 991px) {
+
   .seccion-tabla,
   .seccion-lateral {
     width: 100%;
@@ -36,11 +42,20 @@
   }
 }
 
+/* =====================
+   TARJETAS Y SECCIONES
+===================== */
 .card-deudores {
   margin-bottom: 20px;
   border: none;
   border-radius: 8px;
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: all 0.3s ease;
+}
+
+.card-deudores:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
 }
 
 .fondo-seccion {
@@ -51,6 +66,9 @@
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
+/* =====================
+   NAVBAR Y BOTONES
+===================== */
 .navbar {
   background: linear-gradient(90deg, #1a237e, #283593) !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -64,6 +82,7 @@
 .btn-primary {
   background-color: #1a237e;
   border-color: #1a237e;
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
@@ -71,14 +90,54 @@
   border-color: #0d1b69;
 }
 
+/* Botón verde personalizado para Yape */
+.btn-success-custom {
+  background-color: #28a745;
+  border-color: #28a745;
+  transition: all 0.3s ease;
+}
+
+.btn-success-custom:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+/* =====================
+   TABLAS
+===================== */
 .table-dark {
   background-color: #1a237e;
 }
 
+.table-dark th,
+.table-dark td {
+  color: #fff;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* =====================
+   ESTUDIANTES DEUDORES
+===================== */
 .estudiante-deudor {
   padding: 10px;
   margin-bottom: 10px;
   border-radius: 5px;
   background-color: #fff;
   border-left: 4px solid #dc3545;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
