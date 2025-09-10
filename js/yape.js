@@ -32,7 +32,7 @@ function generarQRYape(monto, concepto, estudiante) {
   const datosQRString = JSON.stringify(datosQR);
   
   // Generar QR usando la API de QR Server
-  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(datosQRString)}&color=28a745&bgcolor=ffffff`;
+  return `${yapeConfig.qrCodeBase}${encodeURIComponent(datosQRString)}&color=28a745&bgcolor=ffffff`;
 }
 
 // Función para mostrar modal de pago con Yape
@@ -162,9 +162,15 @@ function configurarBotonesPagoYape() {
     if (e.target && e.target.classList.contains('btn-pago-yape')) {
       const estudianteId = e.target.getAttribute('data-estudiante-id');
       const estudiante = estudiantes.find(est => est.id == estudianteId);
-      
-      if (estudiante && estudiante.deuda > 0) {
+              if (estudiante && estudiante.deuda >= yapeConfig.montoMinimo) {
         mostrarModalPagoYape(estudiante);
+      } else if (estudiante && estudiante.deuda > 0 && estudiante.deuda < yapeConfig.montoMinimo) {
+        Swal.fire({
+          title: 'Monto insuficiente',
+          text: `El monto mínimo para pago con Yape es ${yapeConfig.montoMinimo} Bs.`,
+          icon: 'warning',
+          confirmButtonColor: '#ffc107'
+        });
       }
     }
   });

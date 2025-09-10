@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Supabase - Sistema Multas ITF</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .log-container {
+            background: #1e1e1e;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        .warning { color: #ffc107; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-4">🔧 Debug Supabase Connection</h1>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Configuración Actual</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>URL:</strong> <code id="current-url"></code></p>
+                        <p><strong>API Key:</strong> <code id="current-key"></code></p>
+                        <p><strong>Estado:</strong> <span id="connection-status" class="badge bg-secondary">No probado</span></p>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Pruebas de Conexión</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="test-connection" class="btn btn-primary me-2">🔍 Probar Conexión</button>
+                        <button id="test-students" class="btn btn-info me-2">👥 Cargar Estudiantes</button>
+                        <button id="test-config" class="btn btn-warning me-2">⚙️ Cargar Configuración</button>
+                        <button id="clear-log" class="btn btn-secondary">🗑️ Limpiar Log</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Log de Debug</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="debug-log" class="log-container">
+                            <div class="info">🚀 Sistema de debug iniciado...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-setup.js"></script>
+    <script>
+        const logContainer = document.getElementById('debug-log');
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Mostrar configuración actual
+        document.getElementById('current-url').textContent = 'https://cgvhokfwcxxmapdceyxg.supabase.co';
+        document.getElementById('current-key').textContent = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+
+        // Inicializar al cargar
+        window.addEventListener('load', async function() {
+            try {
+                addLog('🔄 Cargando Supabase...', 'info');
+                await loadSupabase();
+                addLog('✅ Supabase cargado correctamente', 'success');
+                document.getElementById('connection-status').className = 'badge bg-success';
+                document.getElementById('connection-status').textContent = 'Conectado';
+                
+                // NO hacer conexión automática - solo manual
+                
+            } catch (error) {
+                addLog('❌ Error al cargar Supabase: ' + error.message, 'error');
+                document.getElementById('connection-status').className = 'badge bg-danger';
+                document.getElementById('connection-status').textContent = 'Error';
+            }
+        });
+
+        // Botón probar conexión
+        document.getElementById('test-connection').addEventListener('click', async function() {
+            addLog('🔍 Probando conexión directa...', 'info');
+            
+            // Esperar a que Supabase esté listo
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            try {
+                // Probar conexión directa
+                if (window.EstudiantesDB) {
+                    addLog('✅ EstudiantesDB disponible', 'success');
+                    const estudiantes = await EstudiantesDB.obtenerTodos();
+                    addLog(`✅ Conexión exitosa - ${estudiantes.length} estudiantes encontrados`, 'success');
+                    
+                    if (estudiantes.length > 0) {
+                        addLog('🎉 ¡Base de datos funcionando correctamente!', 'success');
+                        estudiantes.slice(0, 3).forEach(est => {
+                            addLog(`   - ${est.apellido}, ${est.nombre} (Deuda: ${est.deuda} Bs)`, 'info');
+                        });
+                        if (estudiantes.length > 3) {
+                            addLog(`   ... y ${estudiantes.length - 3} más`, 'info');
+                        }
+                    } else {
+                        addLog('⚠️ Base de datos vacía - ejecuta este SQL:', 'warning');
+                        addLog('INSERT INTO estudiantes (apellido, nombre, deuda) VALUES', 'info');
+                        addLog("('Alvarez Cuili', 'Fernando', 0),", 'info');
+                        addLog("('Colque Gomez', 'Rodrigo', 32),", 'info');
+                        addLog("('Nina Quispe', 'Beymar', 0);", 'info');
+                    }
+                } else {
+                    addLog('❌ EstudiantesDB no disponible - Supabase no inicializado', 'error');
+                    addLog('💡 Recarga la página y espera unos segundos', 'info');
+                }
+            } catch (error) {
+                addLog('❌ Error: ' + error.message, 'error');
+                addLog('💡 Verifica que ejecutaste el SQL en Supabase', 'warning');
+            }
+        });
+
+        // Botón cargar estudiantes
+        document.getElementById('test-students').addEventListener('click', async function() {
+            addLog('👥 Cargando estudiantes...', 'info');
+            try {
+                const estudiantes = await EstudiantesDB.obtenerTodos();
+                addLog(`✅ Estudiantes cargados: ${estudiantes.length}`, 'success');
+                estudiantes.slice(0, 3).forEach(est => {
+                    addLog(`   - ${est.apellido}, ${est.nombre} (Deuda: ${est.deuda} Bs)`, 'info');
+                });
+                if (estudiantes.length > 3) {
+                    addLog(`   ... y ${estudiantes.length - 3} más`, 'info');
+                }
+            } catch (error) {
+                addLog('❌ Error al cargar estudiantes: ' + error.message, 'error');
+            }
+        });
+
+        // Botón cargar configuración
+        document.getElementById('test-config').addEventListener('click', async function() {
+            addLog('⚙️ Cargando configuración...', 'info');
+            try {
+                if (!window.ConfiguracionDB) {
+                    addLog('❌ ConfiguracionDB no disponible', 'error');
+                    return;
+                }
+                
+                const yapeConfig = await ConfiguracionDB.obtenerYape();
+                const fondoConfig = await ConfiguracionDB.obtenerFondo();
+                
+                if (yapeConfig && yapeConfig.nombreBeneficiario) {
+                    addLog('✅ Configuración Yape cargada:', 'success');
+                    addLog(`   - Beneficiario: ${yapeConfig.nombreBeneficiario}`, 'info');
+                    addLog(`   - Número: ${yapeConfig.numeroYape}`, 'info');
+                } else {
+                    addLog('❌ Configuración Yape vacía o inválida', 'error');
+                }
+                
+                if (fondoConfig && fondoConfig.color) {
+                    addLog('✅ Configuración Fondo cargada:', 'success');
+                    addLog(`   - Color: ${fondoConfig.color}`, 'info');
+                } else {
+                    addLog('❌ Configuración Fondo vacía o inválida', 'error');
+                }
+            } catch (error) {
+                addLog('❌ Error al cargar configuración: ' + error.message, 'error');
+            }
+        });
+
+        // Botón limpiar log
+        document.getElementById('clear-log').addEventListener('click', function() {
+            logContainer.innerHTML = '<div class="info">🧹 Log limpiado</div>';
+        });
+    </script>
+</body>
+</html>

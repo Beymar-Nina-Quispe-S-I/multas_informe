@@ -1,0 +1,14 @@
+{
+  "name": "Sistema de Multas ITF",
+  "short_name": "Multas ITF",
+  "description": "Sistema de gestión de multas para estudiantes del Instituto Tecnológico Fiscal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a237e",
+  "orientation": "portrait-primary",
+  "icons": [],
+  "categories": ["education", "finance", "productivity"],
+  "lang": "es",
+  "dir": "ltr"
+}

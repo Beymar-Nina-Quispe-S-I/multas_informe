@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Session</title>
+  <link rel="stylesheet" href="css/bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h2>Debug de Sesión</h2>
+    <div class="card">
+      <div class="card-body">
+        <h5>Estado de Sesiones:</h5>
+        <div id="sessionInfo"></div>
+        <hr>
+        <h5>Botones:</h5>
+        <div id="buttonInfo"></div>
+        <hr>
+        <button class="btn btn-primary" onclick="checkSession()">Verificar Sesión</button>
+        <button class="btn btn-success" onclick="createUserSession()">Crear Sesión Usuario</button>
+        <button class="btn btn-danger" onclick="clearSessions()">Limpiar Sesiones</button>
+        <a href="index.html" class="btn btn-info">Ir a Index</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function checkSession() {
+      const userSession = localStorage.getItem("userSession");
+      const adminSession = localStorage.getItem("adminSession");
+      
+      document.getElementById("sessionInfo").innerHTML = `
+        <p><strong>User Session:</strong> ${userSession ? 'SÍ' : 'NO'}</p>
+        <p><strong>Admin Session:</strong> ${adminSession ? 'SÍ' : 'NO'}</p>
+        <p><strong>User Data:</strong> ${userSession || 'Ninguna'}</p>
+        <p><strong>Admin Data:</strong> ${adminSession || 'Ninguna'}</p>
+      `;
+      
+      // Verificar botones en index
+      fetch('index.html')
+        .then(response => response.text())
+        .then(html => {
+          const hasLogoutBtn = html.includes('btnLogout');
+          document.getElementById("buttonInfo").innerHTML = `
+            <p><strong>Botón Logout en HTML:</strong> ${hasLogoutBtn ? 'SÍ' : 'NO'}</p>
+          `;
+        });
+    }
+    
+    function createUserSession() {
+      const userInfo = {
+        nombre: "TestUser",
+        tipo: "usuario",
+        timestamp: new Date().getTime()
+      };
+      localStorage.setItem("userSession", JSON.stringify(userInfo));
+      alert("Sesión de usuario creada");
+      checkSession();
+    }
+    
+    function clearSessions() {
+      localStorage.removeItem("userSession");
+      localStorage.removeItem("adminSession");
+      alert("Sesiones limpiadas");
+      checkSession();
+    }
+    
+    // Auto-check al cargar
+    document.addEventListener("DOMContentLoaded", checkSession);
+  </script>
+</body>
+</html>

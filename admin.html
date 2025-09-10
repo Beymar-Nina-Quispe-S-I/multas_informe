@@ -1,56 +1,48 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel de Administrador - Multas IT</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/bootstrap/css/bootstrap-grid.min.css" />
-  <link rel="stylesheet" href="css/bootstrap/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
 </head>
+
 <body>
   <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
       <div class="container-fluid">
         <a class="navbar-brand titulo" href="#">PANEL DE ADMINISTRADOR</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Dashboard</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="index.html">Ver Sistema</a>
-            </li>
+            <li class="nav-item"><a class="nav-link active" href="#">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="index.html">Ver Sistema</a></li>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Administrar
-              </a>
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                data-bs-toggle="dropdown">Administrar</a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="#seccionEstudiantes">Estudiantes</a></li>
                 <li><a class="dropdown-item" href="#seccionDeudas">Deudas</a></li>
-                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
                 <li><a class="dropdown-item" href="#seccionFondo" id="btnEditarFondo">Editar Fondo</a></li>
-                <!-- En la sección de dropdown del navbar -->
                 <li><a class="dropdown-item" href="#" id="btnEditarYape">Configurar Yape</a></li>
+                <li><a class="dropdown-item" href="#" id="btnGenerarPDF">Generar PDF Deudores</a></li>
               </ul>
             </li>
           </ul>
           <div class="d-flex">
             <span class="text-white me-3"><i class="bi bi-person-circle"></i> <span id="adminName">Admin</span></span>
-            <button id="btnLogout" class="btn btn-outline-light"><i class="bi bi-box-arrow-right"></i> Salir</button>
+            <button id="btnLogout" class="btn btn-outline-danger" style="display: none;"><i
+                class="bi bi-box-arrow-right"></i> SALIR</button>
           </div>
         </div>
       </div>
@@ -58,48 +50,40 @@
   </header>
 
   <main class="container my-4">
+    <!-- Panel de Control -->
     <div class="row">
-      <div class="col-md-12 mb-4">
-        <div class="card shadow-sm">
-          <div class="card-header bg-dark text-white">
-            <h3>Panel de Control</h3>
-          </div>
+      <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white text-center">
           <div class="card-body">
-            <div class="row">
-              <div class="col-md-4 mb-3">
-                <div class="card bg-primary text-white">
-                  <div class="card-body">
-                    <h5 class="card-title">Total Estudiantes</h5>
-                    <p class="card-text display-4" id="totalEstudiantes">22</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4 mb-3">
-                <div class="card bg-danger text-white">
-                  <div class="card-body">
-                    <h5 class="card-title">Estudiantes con Deuda</h5>
-                    <p class="card-text display-4" id="totalDeudores">6</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4 mb-3">
-                <div class="card bg-success text-white">
-                  <div class="card-body">
-                    <h5 class="card-title">Total Recaudado</h5>
-                    <p class="card-text display-4" id="totalRecaudado">83 Bs.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <h5 class="card-title">Total Estudiantes</h5>
+            <p class="card-text display-4" id="totalEstudiantes">0</p>
           </div>
         </div>
       </div>
+      <div class="col-md-4 mb-3">
+        <div class="card bg-danger text-white text-center">
+          <div class="card-body">
+            <h5 class="card-title">Estudiantes con Deuda</h5>
+            <p class="card-text display-4" id="totalDeudores">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white text-center">
+          <div class="card-body">
+            <h5 class="card-title">Total Recaudado</h5>
+            <p class="card-text display-4" id="totalRecaudado">0 Bs.</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <!-- Sección de Estudiantes -->
-      <div class="col-md-12 mb-4" id="seccionEstudiantes">
+    <!-- Gestión de Estudiantes -->
+    <div class="row mb-4" id="seccionEstudiantes">
+      <div class="col-12">
         <div class="card shadow-sm">
-          <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Gestión de Estudiantes</h3>
+          <div class="card-header bg-dark text-white d-flex justify-content-between">
+            <h3>Gestión de Estudiantes</h3>
             <button class="btn btn-success"><i class="bi bi-plus-circle"></i> Añadir Estudiante</button>
           </div>
           <div class="card-body">
@@ -114,89 +98,62 @@
                     <th>Acciones</th>
                   </tr>
                 </thead>
-                <tbody id="tablaEstudiantesAdmin">
-                  <!-- Se llenará dinámicamente -->
-                </tbody>
+                <tbody id="tablaEstudiantesAdmin"></tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
-      
-      <!-- Sección de Deudas -->
-      <div class="col-md-12 mb-4" id="seccionDeudas">
+    </div>
+
+    <!-- Gestión de Deudas -->
+    <div class="row mb-4" id="seccionDeudas">
+      <div class="col-md-6">
         <div class="card shadow-sm">
-          <div class="card-header bg-danger text-white">
-            <h3 class="mb-0">Gestión de Deudas</h3>
+          <div class="card-header bg-light">
+            <h5>Estudiantes con Deudas</h5>
+          </div>
+          <div class="card-body" id="listaDeudoresAdmin"></div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light">
+            <h5>Estadísticas de Deudas</h5>
           </div>
           <div class="card-body">
-            <div class="row mb-4">
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-header bg-light">
-                    <h5 class="mb-0">Estudiantes con Deudas</h5>
-                  </div>
-                  <div class="card-body">
-                    <div id="listaDeudoresAdmin">
-                      <!-- Se llenará dinámicamente -->
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-header bg-light">
-                    <h5 class="mb-0">Estadísticas de Deudas</h5>
-                  </div>
-                  <div class="card-body">
-                    <canvas id="graficaDeudas" width="400" height="300"></canvas>
-                  </div>
-                </div>
-              </div>
+            <canvas id="graficaDeudas" width="400" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuración de Fondo -->
+    <div class="row" id="seccionFondo">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light">
+            <h5>Fondo Actual</h5>
+          </div>
+          <div class="card-body">
+            <div class="fondo-preview p-3 rounded"
+              style="background-color: #f8f9fa; height: 200px; display: flex; align-items: center; justify-content: center;">
+              <p class="text-center">Vista previa del fondo actual</p>
             </div>
           </div>
         </div>
       </div>
-      
-      <!-- Sección de Fondo -->
-      <div class="col-md-12" id="seccionFondo">
+      <div class="col-md-6">
         <div class="card shadow-sm">
-          <div class="card-header bg-success text-white">
-            <h3 class="mb-0">Configuración de Fondo</h3>
+          <div class="card-header bg-light">
+            <h5>Opciones de Fondo</h5>
           </div>
           <div class="card-body">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="card mb-3">
-                  <div class="card-header bg-light">
-                    <h5 class="mb-0">Fondo Actual</h5>
-                  </div>
-                  <div class="card-body">
-                    <div class="fondo-preview p-3 rounded" style="background-color: #f8f9fa; height: 200px; display: flex; align-items: center; justify-content: center;">
-                      <p class="text-center">Vista previa del fondo actual</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-header bg-light">
-                    <h5 class="mb-0">Opciones de Fondo</h5>
-                  </div>
-                  <div class="card-body">
-                    <button class="btn btn-primary w-100 mb-3" id="btnEditarFondoSeccion">
-                      <i class="bi bi-palette"></i> Editar Color y Fondo
-                    </button>
-                    <button class="btn btn-info w-100 mb-3">
-                      <i class="bi bi-image"></i> Subir Nueva Imagen
-                    </button>
-                    <button class="btn btn-warning w-100">
-                      <i class="bi bi-arrow-counterclockwise"></i> Restaurar Predeterminado
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <button class="btn btn-primary w-100 mb-3" id="btnEditarFondoSeccion"><i class="bi bi-palette"></i> Editar
+              Color y Fondo</button>
+            <button class="btn btn-info w-100 mb-3"><i class="bi bi-image"></i> Subir Nueva Imagen</button>
+            <button class="btn btn-warning w-100"><i class="bi bi-arrow-counterclockwise"></i> Restaurar
+              Predeterminado</button>
           </div>
         </div>
       </div>
@@ -209,8 +166,16 @@
     </div>
   </footer>
 
+  <!-- Librerías externas -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="css/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- JS personalizados -->
+  <script src="js/supabase-setup.js"></script>
   <script src="js/admin.js"></script>
 </body>
+
 </html>

@@ -13,9 +13,12 @@
   <!-- Añadir jQuery UI para autocompletado -->
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-  <!-- Añadir SweetAlert2 para alertas mejoradas -->
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="css/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="js/supabase-setup.js"></script>
+  <script src="js/login.js"></script>
 </head>
 <body class="bg-light">
   <div class="container">
@@ -42,10 +45,6 @@
                     <label for="nombreUsuario" class="form-label">Nombre</label>
                     <input type="text" class="form-control" id="nombreUsuario" placeholder="Ingrese su nombre" required>
                     <div class="form-text">El sistema autocompletará nombres registrados.</div>
-                  </div>
-                  <div class="mb-3">
-                    <label for="correoUsuario" class="form-label">Correo electrónico</label>
-                    <input type="email" class="form-control" id="correoUsuario" placeholder="Ingrese su correo" required>
                   </div>
                   <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-primary">Ingresar</button>
