@@ -130,20 +130,20 @@ async function cargarEstudiantesDesdeSupabaseMain() {
     console.log('🔄 Cargando estudiantes en main...');
 
     // Verificar que Supabase esté disponible
-    if (!window.supabase) {
+    if (!window.supabaseClient) {
       console.error('❌ Supabase no disponible');
       throw new Error('Supabase no disponible');
     }
 
-    if (!window.EstudiantesDB) {
-      console.error('❌ EstudiantesDB no disponible en main');
+    if (!window.EstudiantesDB || typeof EstudiantesDB.obtenerTodos !== 'function') {
+      console.error('❌ EstudiantesDB no disponible');
       throw new Error('EstudiantesDB no disponible');
     }
 
     console.log('🔍 Probando conexión directa a Supabase...');
 
     // Probar conexión directa primero
-    const { data: testData, error: testError } = await window.supabase
+    const { data: testData, error: testError } = await window.supabaseClient
       .from('estudiantes')
       .select('*')
       .limit(1);
@@ -161,19 +161,19 @@ async function cargarEstudiantesDesdeSupabaseMain() {
     estudiantes.length = 0;
     estudiantes.push(...estudiantesDB);
 
-    // Actualizar interfaz SIEMPRE
-    console.log('🔄 Actualizando interfaz...');
-    actualizarTablaEstudiantes();
-    mostrarEstudiantesConDeudas();
+    // Actualizar interfaz
+    if (typeof actualizarTablaEstudiantes === 'function') actualizarTablaEstudiantes();
+    if (typeof mostrarEstudiantesConDeudas === 'function') mostrarEstudiantesConDeudas();
 
     console.log('✅ Estudiantes cargados en main desde Supabase:', estudiantes.length);
 
     if (estudiantes.length === 0) {
       console.warn('⚠️ No hay estudiantes en la base de datos');
       console.log('💡 Ejecuta este SQL en Supabase:');
-      console.log("INSERT INTO estudiantes (apellido, nombre, deuda) VALUES ('Alvarez Cuili', 'Fernando', 0), ('Colque Gomez', 'Rodrigo', 32), ('Nina Quispe', 'Beymar', 0);");
+      console.log(
+        "INSERT INTO estudiantes (apellido, nombre, deuda) VALUES ('Alvarez Cuili', 'Fernando', 0), ('Colque Gomez', 'Rodrigo', 32), ('Nina Quispe', 'Beymar', 0);"
+      );
 
-      // Mostrar mensaje al usuario
       const tbody = document.querySelector("tbody");
       if (tbody) {
         tbody.innerHTML = '<tr><td colspan="4" class="text-center text-warning">⚠️ No hay estudiantes registrados en Supabase<br><small>Ejecuta el SQL de inserción</small></td></tr>';
@@ -184,10 +184,10 @@ async function cargarEstudiantesDesdeSupabaseMain() {
   } catch (error) {
     console.error('❌ Error al cargar estudiantes en main:', error);
     console.log('🔄 Intentando fallback a datos locales...');
-    // Fallback a datos locales si falla
-    cargarDatosGuardados();
+    if (typeof cargarDatosGuardados === 'function') cargarDatosGuardados();
   }
 }
+
 
 // Función para cargar datos guardados desde localStorage (fallback)
 function cargarDatosGuardados() {
