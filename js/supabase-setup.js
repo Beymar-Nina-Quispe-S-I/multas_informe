@@ -10,7 +10,7 @@ async function testSupabaseConnection() {
     try {
         console.log('🔍 Probando conexión a Supabase...');
 
-        if (!window.supabaseClient) {
+        if (!window.supabaseClientClient) {
             console.error('❌ Cliente Supabase no inicializado');
             return false;
         }
@@ -33,11 +33,11 @@ async function testSupabaseConnection() {
 // Inicializar cliente Supabase
 function initializeSupabase() {
     try {
-        if (!window.supabase || !window.supabase.createClient) {
+        if (!window.supabaseClient || !window.supabaseClient.createClient) {
             throw new Error('Supabase library not loaded');
         }
 
-        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const client = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Guardar referencia global única
         window.supabaseClient = client;

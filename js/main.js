@@ -90,7 +90,7 @@ window.addEventListener('load', function () {
   // Verificar conexión y datos cada 10 segundos (reducido para evitar problemas)
   setInterval(async function () {
     try {
-      if (window.EstudiantesDB && window.supabase && typeof window.supabase.from === 'function') {
+      if (window.EstudiantesDB && window.supabaseClient && typeof window.supabaseClient.from === 'function') {
         const estudiantesActualizados = await EstudiantesDB.obtenerTodos();
         const hayDiferencias = JSON.stringify(estudiantes) !== JSON.stringify(estudiantesActualizados);
         if (hayDiferencias) {
@@ -130,7 +130,7 @@ async function cargarEstudiantesDesdeSupabaseMain() {
     console.log('🔄 Cargando estudiantes en main...');
 
     // Verificar que Supabase esté disponible
-    if (!window.supabaseClient) {
+    if (!window.supabaseClientClientClient) {
       console.error('❌ Supabase no disponible');
       throw new Error('Supabase no disponible');
     }
@@ -143,7 +143,7 @@ async function cargarEstudiantesDesdeSupabaseMain() {
     console.log('🔍 Probando conexión directa a Supabase...');
 
     // Probar conexión directa primero
-    const { data: testData, error: testError } = await window.supabaseClient
+    const { data: testData, error: testError } = await window.supabaseClientClient
       .from('estudiantes')
       .select('*')
       .limit(1);
