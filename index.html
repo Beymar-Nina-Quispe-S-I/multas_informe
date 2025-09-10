@@ -88,115 +88,104 @@
                   <th>Apellido</th>
                   <th>Nombre</th>
                   <th>Deuda</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody class="table-group-divider">
+              <tbody id="tablaEstudiantesAdmin" class="table-group-divider">
                 <!-- Los datos se cargarán dinámicamente con JavaScript -->
               </tbody>
             </table>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Sección de Deudores -->
-    <div class="seccion-lateral" id="seccionDeudores">
-      <!-- Tarjeta de estudiantes con deudas -->
-      <div class="card shadow-sm card-deudores">
-        <div class="card-header text-center bg-danger text-white">
-          <h3>Estudiantes con Deudas</h3>
+      <!-- Sección de Deudores -->
+      <div class="seccion-lateral" id="seccionDeudores">
+        <!-- Tarjeta de estudiantes con deudas -->
+        <div class="card shadow-sm card-deudores">
+          <div class="card-header text-center bg-danger text-white">
+            <h3>Estudiantes con Deudas</h3>
+          </div>
+          <div class="card-body">
+            <div id="listaDeudoresAdmin">
+              <!-- Se llenará dinámicamente con JavaScript -->
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <div id="lista-deudores">
-            <!-- Se llenará dinámicamente con JavaScript -->
+
+        <!-- Sección de Fondos -->
+        <div class="fondo-seccion bg-success text-white" id="seccionFondo">
+          <h4 class="text-center mb-3">Información de Fondos</h4>
+          <div id="datos-adicionales">
+            <p class="text-center">Información sobre los fondos recaudados</p>
+            <div class="text-center mt-3">
+              <h5>Total Recaudado</h5>
+              <p class="display-6" id="totalRecaudado">0 Bs.</p>
+            </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Sección de Fondos -->
-      <div class="fondo-seccion bg-success text-white" id="seccionFondo">
-        <h4 class="text-center mb-3">Información de Fondos</h4>
-        <div id="datos-adicionales">
-          <!-- Aquí se pueden agregar datos adicionales que no irán al PDF -->
-          <p class="text-center">Información sobre los fondos recaudados</p>
-          <div class="text-center mt-3">
-            <h5>Total Recaudado</h5>
-            <p class="display-6" id="totalRecaudado">83 Bs.</p>
-          </div>
-        </div>
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+      <div class="container">
+        <p class="mb-0">
+          © 2025 Sistema de Multas I.T.F. - Todos los derechos reservados
+        </p>
       </div>
-    </div>
-  </div>
+      <!-- Bootstrap -->
+      <script src="css/bootstrap/js/bootstrap.bundle.min.js"></script>
+      <!-- SweetAlert2 -->
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <!-- Supabase -->
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+      <!-- Scripts -->
+      <script src="js/supabase-setup.js"></script>
+      <script src="js/yape.js"></script>
+      <script src="js/main.js" defer></script>
 
-  <footer class="bg-dark text-white text-center py-3 mt-5">
-    <div class="container">
-      <p class="mb-0">
-        © 2025 Sistema de Multas I.T.F. - Todos los derechos reservados
-      </p>
-    </div>
-    <!-- Bootstrap -->
-    <script src="css/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Supabase primero -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <script src="js/supabase-setup.js"></script>
-    <script src="js/yape.js"></script>
-    <script src="js/main.js" defer></script>
-    <!-- Script directo para forzar botón logout y registrar SW -->
-    <script>
-      window.addEventListener('load', function () {
-        setTimeout(function () {
-          const userSession = localStorage.getItem("userSession");
-          const adminSession = localStorage.getItem("adminSession");
-          const btnLogout = document.getElementById("btnLogout");
-          const btnLogin = document.getElementById("btnLogin");
-          const userInfo = document.getElementById("userInfo");
-
-          console.log("FORZANDO BOTONES - User:", userSession, "Admin:", adminSession);
-
-          if (userSession || adminSession) {
-            if (btnLogout) {
-              btnLogout.style.display = "inline-block";
-              btnLogout.style.visibility = "visible";
-              btnLogout.style.backgroundColor = "#dc3545";
-              btnLogout.style.color = "white";
-              btnLogout.style.border = "2px solid #dc3545";
-              btnLogout.classList.remove("d-none");
-              btnLogout.innerHTML = '<i class="bi bi-box-arrow-right"></i> SALIR';
-              console.log("BOTÓN LOGOUT FORZADO");
-            }
-            if (btnLogin) {
-              btnLogin.style.display = "none";
-            }
-
-            if (userSession && userInfo) {
-              const userData = JSON.parse(userSession);
-              userInfo.innerHTML = `<i class="bi bi-person-circle"></i> ${userData.nombre}`;
-              userInfo.style.display = "inline-block";
-            }
-          }
-        }, 500);
-      });
-
-      // Registrar Service Worker para PWA
-      if ('serviceWorker' in navigator) {
+      <script>
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('/sw.js')
-            .then(function (registration) {
-              console.log('SW registrado con éxito:', registration.scope);
-            })
-            .catch(function (error) {
-              console.log('SW falló al registrarse:', error);
-            });
-        });
-      }
-    </script>
+          setTimeout(function () {
+            const userSession = localStorage.getItem("userSession");
+            const adminSession = localStorage.getItem("adminSession");
+            const btnLogout = document.getElementById("btnLogout");
+            const btnLogin = document.getElementById("btnLogin");
+            const userInfo = document.getElementById("userInfo");
 
-  </footer>
+            if (userSession || adminSession) {
+              if (btnLogout) {
+                btnLogout.style.display = "inline-block";
+                btnLogout.style.backgroundColor = "#dc3545";
+                btnLogout.style.color = "white";
+                btnLogout.style.border = "2px solid #dc3545";
+                btnLogout.innerHTML = '<i class="bi bi-box-arrow-right"></i> SALIR';
+              }
+              if (btnLogin) btnLogin.style.display = "none";
+
+              if (userSession && userInfo) {
+                const userData = JSON.parse(userSession);
+                userInfo.innerHTML = `<i class="bi bi-person-circle"></i> ${userData.nombre}`;
+                userInfo.style.display = "inline-block";
+              }
+            }
+          }, 500);
+        });
+
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js')
+              .then(function (registration) {
+                console.log('SW registrado con éxito:', registration.scope);
+              })
+              .catch(function (error) {
+                console.log('SW falló al registrarse:', error);
+              });
+          });
+        }
+      </script>
+    </footer>
 </body>
 
 </html>

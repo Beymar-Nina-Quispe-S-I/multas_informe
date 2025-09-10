@@ -1,7 +1,7 @@
 // ============================
 // Variables globales
 // ============================
-let estudiantes = [];
+window.estudiantes = [];
 
 // ============================
 // Inicialización de la página
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         await loadSupabase();
         console.log('✅ Supabase cargado');
 
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Cargar estudiantes desde Supabase
         await cargarEstudiantesDesdeSupabase();
     } catch (error) {
         console.error('❌ Error inicialización:', error);
@@ -23,10 +23,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     mostrarNombreAdmin();
-    cargarDatosDashboard();
     cargarTablaEstudiantes();
-    configurarBotones();
     cargarListaDeudores();
+    cargarDatosDashboard(); // actualizar dashboard luego de cargar estudiantes
+    configurarBotones();
     aplicarFondoGuardado();
 });
 
@@ -37,19 +37,18 @@ async function cargarEstudiantesDesdeSupabase() {
     try {
         if (!window.EstudiantesDB) throw new Error('EstudiantesDB no disponible');
         const estudiantesDB = await EstudiantesDB.obtenerTodos();
-        estudiantes = [...estudiantesDB];
-        cargarDashboard();
-        console.log('✅ Estudiantes cargados:', estudiantes.length);
+        window.estudiantes = [...estudiantesDB];
+        console.log('✅ Estudiantes cargados desde Supabase:', window.estudiantes.length);
     } catch (error) {
         console.error('❌ Error cargando estudiantes:', error);
-        if (estudiantes.length === 0) {
-            estudiantes.push(
+        if (window.estudiantes.length === 0) {
+            window.estudiantes = [
                 { id: 1, apellido: "Alvarez Cuili", nombre: "Fernando", deuda: 0 },
                 { id: 2, apellido: "Apaza Paco", nombre: "Marck", deuda: 0 },
                 { id: 8, apellido: "Colque Gomez", nombre: "Rodrigo", deuda: 32 },
                 { id: 10, apellido: "Gutierrez Quispe", nombre: "Melanie", deuda: 3 },
                 { id: 11, apellido: "Huiza Viscarra", nombre: "Luis", deuda: 38 }
-            );
+            ];
         }
     }
 }
@@ -57,7 +56,7 @@ async function cargarEstudiantesDesdeSupabase() {
 // ============================
 // Sesión administrador
 // ============================
-function verificarSesionAdmin() {
+async function verificarSesionAdmin() {
     const adminSession = localStorage.getItem("adminSession");
     if (!adminSession) return (window.location.href = "login.html");
 
@@ -104,10 +103,18 @@ function cargarSweetAlert() {
 // Dashboard
 // ============================
 function cargarDatosDashboard() {
-    document.getElementById("totalEstudiantes")?.textContent = estudiantes.length;
-    const deudores = estudiantes.filter(e => e.deuda > 0);
+    if (!window.estudiantes || window.estudiantes.length === 0) {
+        console.warn("⚠️ Dashboard: No hay estudiantes cargados aún");
+        return;
+    }
+
+    const totalEstudiantes = window.estudiantes.length;
+    const deudores = window.estudiantes.filter(e => e.deuda > 0);
+    const totalRecaudado = window.estudiantes.reduce((acc, e) => acc + (e.deuda || 0), 0);
+
+    document.getElementById("totalEstudiantes")?.textContent = totalEstudiantes;
     document.getElementById("totalDeudores")?.textContent = deudores.length;
-    document.getElementById("totalRecaudado")?.textContent = `${estudiantes.reduce((a, b) => a + b.deuda, 0)} Bs.`;
+    document.getElementById("totalRecaudado")?.textContent = `${totalRecaudado} Bs.`;
 }
 
 function actualizarDashboard() {
@@ -121,7 +128,7 @@ function cargarTablaEstudiantes() {
     const tbody = document.getElementById("tablaEstudiantesAdmin");
     if (!tbody) return;
     tbody.innerHTML = "";
-    estudiantes.forEach(est => {
+    window.estudiantes.forEach(est => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${est.id}</td>
@@ -154,7 +161,7 @@ function configurarBotones() {
 }
 
 async function aumentarMulta(id) {
-    const est = estudiantes.find(e => e.id === id);
+    const est = window.estudiantes.find(e => e.id === id);
     if (!est) return;
     const { value: monto } = await Swal.fire({
         title: `Aumentar multa a ${est.nombre} ${est.apellido}`,
@@ -177,7 +184,7 @@ async function aumentarMulta(id) {
 }
 
 async function disminuirMulta(id) {
-    const est = estudiantes.find(e => e.id === id);
+    const est = window.estudiantes.find(e => e.id === id);
     if (!est || est.deuda <= 0) return;
     const { value: monto } = await Swal.fire({
         title: `Disminuir multa a ${est.nombre} ${est.apellido}`,
@@ -205,7 +212,7 @@ async function disminuirMulta(id) {
 function cargarListaDeudores() {
     const container = document.getElementById('listaDeudoresAdmin');
     if (!container) return;
-    const deudores = estudiantes.filter(e => e.deuda > 0);
+    const deudores = window.estudiantes.filter(e => e.deuda > 0);
     container.innerHTML = deudores.length === 0
         ? '<p class="text-muted">No hay estudiantes con deudas pendientes.</p>'
         : deudores.map(e => `
@@ -220,9 +227,9 @@ function cargarListaDeudores() {
 // Sincronización y persistencia
 // ============================
 function sincronizarConVistaUsuario() {
-    if (window.parent) window.parent.estudiantes = estudiantes;
-    window.dispatchEvent(new CustomEvent('datosActualizados', { detail: { estudiantes } }));
-    localStorage.setItem('estudiantesData', JSON.stringify(estudiantes));
+    if (window.parent) window.parent.estudiantes = window.estudiantes;
+    window.dispatchEvent(new CustomEvent('datosActualizados', { detail: { estudiantes: window.estudiantes } }));
+    localStorage.setItem('estudiantesData', JSON.stringify(window.estudiantes));
 }
 
 // ============================
@@ -242,7 +249,7 @@ function aplicarFondoGuardado() {
 // PDF
 // ============================
 function generarPDFDeudores() {
-    const deudores = estudiantes.filter(e => e.deuda > 0);
+    const deudores = window.estudiantes.filter(e => e.deuda > 0);
     if (deudores.length === 0) return Swal.fire('Sin deudores', 'No hay estudiantes con deudas', 'info');
 
     const { jsPDF } = window.jspdf;
